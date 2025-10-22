@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe Street - Juego Gratis</title>
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-TU_ID_DE_ANUNCIANTE" crossorigin="anonymous"></script>
+    <style>
+        /* =========================
+           RESET & BASE
+        ========================= */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            font-family: 'Arial', sans-serif;
+            background: #fefcf5;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* =========================
+           FONDO CUADERNO
+        ========================= */
+        .notebook-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: 
+                repeating-linear-gradient(
+                    to bottom,
+                    transparent 0px,
+                    transparent 38px,
+                    #d3d3d3 38px,
+                    #d3d3d3 40px
+                );
+        }
+
+        .notebook-background::before {
+            content: "";
+            position: absolute;
+            left: 40px;
+            top: 0;
+            width: 3px;
+            height: 100%;
+            background: #ff4a4a;
+        }
+
+        /* =========================
+           PANTALLAS
+        ========================= */
+        .screen {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .menu-container {
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        /* =========================
+           TIPOGRAFÍA
+        ========================= */
+        .title {
+            font-size: 3.5em;
+            color: #ff4a6e;
+            text-shadow: 3px 3px #ffe156;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .subtitle {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 40px;
+            font-weight: 300;
+        }
+
+        /* =========================
+           BOTONES
+        ========================= */
+        .menu-btn {
+            font-size: 1.6em;
+            padding: 18px 35px;
+            margin: 15px;
+            background: linear-gradient(145deg, #ff758c, #ff4a6e);
+            border: none;
+            border-radius: 15px;
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 6px #d9534f;
+            transition: all 0.3s ease;
+            width: 80%;
+            max-width: 320px;
+            font-weight: bold;
+        }
+
+        .menu-btn:hover {
+            transform: scale(1.1) rotate(-2deg);
+            box-shadow: 0 10px #d9534f;
+            filter: brightness(1.2);
+        }
+
+        .menu-btn-small {
+            font-size: 1.3em;
+            padding: 12px 25px;
+            margin: 8px;
+            background: linear-gradient(145deg, #00cfff, #0077aa);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 5px #005577;
+            transition: all 0.3s ease;
+        }
+
+        .menu-btn-small:hover {
+            transform: scale(1.08) rotate(1deg);
+            box-shadow: 0 8px #005577;
+            filter: brightness(1.2);
+        }
+
+        .level-btn {
+            font-size: 1.4em;
+            padding: 15px 30px;
+            margin: 8px;
+            background: linear-gradient(145deg, #ffd166, #ff9e00);
+            border: none;
+            border-radius: 12px;
+            color: #333;
+            cursor: pointer;
+            box-shadow: 0 4px #cc7e00;
+            transition: all 0.3s ease;
+            width: 200px;
+            font-weight: bold;
+        }
+
+        .level-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px #cc7e00;
+        }
+
+        .level-btn.completed {
+            background: linear-gradient(145deg, #06d6a0, #04a777);
+            box-shadow: 0 4px #038c65;
+        }
+
+        .level-btn.locked {
+            background: linear-gradient(145deg, #b0b0b0, #8a8a8a);
+            box-shadow: 0 4px #666;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* =========================
+           TABLERO DE JUEGO
+        ========================= */
+        .board-container {
+            display: grid;
+            grid-template-columns: repeat(3, 110px);
+            grid-template-rows: repeat(3, 110px);
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+            border: 3px solid #ff4a6e;
+        }
+
+        .cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            font-weight: bold;
+            cursor: pointer;
+            border: 3px solid #d3d3d3;
+            background: #fefcf5;
+            transition: all 0.3s ease;
+            user-select: none;
+            border-radius: 10px;
+        }
+
+        .cell:hover {
+            transform: scale(1.1) rotate(-1deg);
+            background: #fff7d6;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            border-color: #ff4a6e;
+        }
+
+        .cell.X {
+            color: #ff4a6e;
+            text-shadow: 2px 2px #ffe156;
+        }
+
+        .cell.O {
+            color: #00cfff;
+            text-shadow: 2px 2px #00ffaa;
+        }
+
+        /* =========================
+           ESTADO DEL JUEGO
+        ========================= */
+        .status {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px #fff;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: bold;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .status.win {
+            color: #28a745;
+            text-shadow: 2px 2px #fffacd;
+            animation: popWin 0.5s;
+        }
+
+        .status.lose {
+            color: #dc3545;
+            text-shadow: 2px 2px #fffacd;
+            animation: popLose 0.5s;
+        }
+
+        .level-info {
+            font-size: 1.5em;
+            color: #ff6b35;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        @keyframes popWin {
+            0% { transform: scale(0.8); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes popLose {
+            0% { transform: scale(0.8); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* =========================
+           CONFETI
+        ========================= */
+        .confetti-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* =========================
+           ANUNCIOS (SIN MARCOS)
+        ========================= */
+        .ad-container {
+            margin: 20px 0;
+            text-align: center;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .ad-banner {
+            background: transparent;
+            padding: 0;
+            min-height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 728px;
+        }
+
+        .ad-sidebar {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 160px;
+            height: 600px;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+        }
+
+        .ad-left {
+            left: 15px;
+        }
+
+        .ad-right {
+            right: 15px;
+        }
+
+        /* =========================
+           NIVELES
+        ========================= */
+        .levels-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        .level-completion {
+            font-size: 1.2em;
+            margin: 15px 0;
+            color: #666;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2.8em;
+            }
+            
+            .subtitle {
+                font-size: 1.4em;
+            }
+            
+            .menu-btn {
+                font-size: 1.4em;
+                padding: 15px 25px;
+            }
+            
+            .board-container {
+                grid-template-columns: repeat(3, 90px);
+                grid-template-rows: repeat(3, 90px);
+                gap: 10px;
+                padding: 20px;
+            }
+            
+            .cell {
+                font-size: 2.5em;
+            }
+            
+            .status {
+                font-size: 1.6em;
+            }
+            
+            .ad-sidebar {
+                display: none;
+            }
+            
+            .ad-banner {
+                min-height: 90px;
+            }
+
+            .levels-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .level-btn {
+                width: 100%;
+                max-width: 280px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .title {
+                font-size: 2.2em;
+            }
+            
+            .subtitle {
+                font-size: 1.2em;
+                margin-bottom: 30px;
+            }
+            
+            .menu-btn {
+                font-size: 1.2em;
+                padding: 12px 20px;
+                margin: 10px;
+            }
+            
+            .board-container {
+                grid-template-columns: repeat(3, 75px);
+                grid-template-rows: repeat(3, 75px);
+                gap: 8px;
+                padding: 15px;
+            }
+            
+            .cell {
+                font-size: 2em;
+            }
+            
+            .status {
+                font-size: 1.4em;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .ad-sidebar {
+                display: none;
+            }
+        }
+
+        /* =========================
+           ANIMACIONES EXTRA
+        ========================= */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+        }
+
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Anuncios laterales para desktop -->
+    <div class="ad-sidebar ad-left">
+        <div class="ad-banner">
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+            <ins class="adsbygoogle"
+                 style="display:inline-block;width:160px;height:600px"
+                 data-ad-client="ca-pub-TU_ID"
+                 data-ad-slot="1234567890"></ins>
+            <script>
+                 (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+    </div>
+
+    <div class="ad-sidebar ad-right">
+        <div class="ad-banner">
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+            <ins class="adsbygoogle"
+                 style="display:inline-block;width:160px;height:600px"
+                 data-ad-client="ca-pub-TU_ID"
+                 data-ad-slot="0987654321"></ins>
+            <script>
+                 (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+    </div>
+
+    <!-- Pantalla de Menú Principal -->
+    <div id="menuScreen" class="screen">
+        <div class="menu-container">
+            <h1 class="title floating">Tic Tac Toe Street</h1>
+            <p class="subtitle">¡Clásico escolar con flow street! 🎯</p>
+            
+            <button id="btnOnePlayer" class="menu-btn pulse">1 Jugador 🖥️</button>
+            <button id="btnTwoPlayers" class="menu-btn pulse">2 Jugadores 👥</button>
+            <button id="btnAdventure" class="menu-btn pulse">🎮 Modo Aventura</button>
+            
+            <!-- Anuncio en menú principal -->
+            <div class="ad-container">
+                <div class="ad-banner">
+                    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                    <ins class="adsbygoogle"
+                         style="display:block"
+                         data-ad-client="ca-pub-TU_ID"
+                         data-ad-slot="1122334455"
+                         data-ad-format="auto"
+                         data-full-width-responsive="true"></ins>
+                    <script>
+                         (adsbygoogle = window.adsbygoogle || []).push({});
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pantalla de Selección de Fichas -->
+    <div id="chooseXO" class="screen" style="display:none;">
+        <div class="menu-container">
+            <h2 class="title">Elige tu ficha</h2>
+            <button id="chooseX" class="menu-btn">Soy X ❌</button>
+            <button id="chooseO" class="menu-btn">Soy O ⭕</button>
+            <button id="btnBackXO" class="menu-btn-small">← Volver</button>
+        </div>
+    </div>
+
+    <!-- Pantalla de Selección de Niveles -->
+    <div id="levelsScreen" class="screen" style="display:none;">
+        <div class="menu-container">
+            <h2 class="title">Modo Aventura</h2>
+            <p class="subtitle">¡Completa los 10 niveles! 🏆</p>
+            
+            <div class="level-completion" id="levelProgress">Progreso: 0/10 niveles</div>
+            
+            <div class="levels-grid" id="levelsGrid">
+                <!-- Los niveles se generarán dinámicamente -->
+            </div>
+            
+            <button id="btnBackLevels" class="menu-btn-small">← Volver al Menú</button>
+        </div>
+    </div>
+
+    <!-- Pantalla de Juego -->
+    <div id="gameScreen" class="screen" style="display:none; flex-direction:column;">
+        <!-- Anuncio arriba del juego -->
+        <div class="ad-container">
+            <div class="ad-banner">
+                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-TU_ID"
+                     data-ad-slot="5566778899"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+                <script>
+                     (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            </div>
+        </div>
+        
+        <div class="level-info" id="levelInfo">Nivel 1 - Principiante</div>
+        <h2 id="statusDisplay" class="status">Turno de ❌ X</h2>
+        
+        <div id="board" class="board-container">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+        
+        <div class="menu-container" style="margin-top:20px;">
+            <button id="btnRestart" class="menu-btn-small">🔄 Reiniciar</button>
+            <button id="btnBackMenu" class="menu-btn-small">🏠 Menú Principal</button>
+            <button id="btnNextLevel" class="menu-btn-small" style="display:none;">⭐ Siguiente Nivel</button>
+        </div>
+        
+        <!-- Anuncio debajo del juego -->
+        <div class="ad-container">
+            <div class="ad-banner">
+                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-TU_ID"
+                     data-ad-slot="6677889900"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+                <script>
+                     (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            </div>
+        </div>
+        
+        <canvas id="confettiCanvas" class="confetti-layer"></canvas>
+    </div>
+
+    <!-- Fondo del cuaderno -->
+    <div class="notebook-background"></div>
+
+    <script>
+        // =========================
+        // INICIALIZACIÓN Y VARIABLES
+        // =========================
+        const menu = document.getElementById('menuScreen');
+        const chooseXO = document.getElementById('chooseXO');
+        const levelsScreen = document.getElementById('levelsScreen');
+        const game = document.getElementById('gameScreen');
+        const btnOne = document.getElementById('btnOnePlayer');
+        const btnTwo = document.getElementById('btnTwoPlayers');
+        const btnAdventure = document.getElementById('btnAdventure');
+        const btnBack = document.getElementById('btnBackMenu');
+        const btnRestart = document.getElementById('btnRestart');
+        const btnBackXO = document.getElementById('btnBackXO');
+        const btnBackLevels = document.getElementById('btnBackLevels');
+        const btnNextLevel = document.getElementById('btnNextLevel');
+        const chooseX = document.getElementById('chooseX');
+        const chooseO = document.getElementById('chooseO');
+        const boardEl = document.getElementById('board');
+        const cells = Array.from(document.querySelectorAll('.cell'));
+        const statusEl = document.getElementById('statusDisplay');
+        const levelInfo = document.getElementById('levelInfo');
+        const levelProgress = document.getElementById('levelProgress');
+        const levelsGrid = document.getElementById('levelsGrid');
+        const confettiCanvas = document.getElementById('confettiCanvas');
+        const confCtx = confettiCanvas.getContext('2d');
+
+        // Estado del juego
+        let gameActive = false;
+        let vsComputer = false;
+        let adventureMode = false;
+        let humanPlayer = 'X', botPlayer = 'O';
+        let currentPlayer = 'X';
+        let gameState = Array(9).fill('');
+        let currentLevel = 1;
+        let completedLevels = JSON.parse(localStorage.getItem('completedLevels')) || [];
+        let botTimeout = null;
+
+        const winningConditions = [
+            [0,1,2], [3,4,5], [6,7,8],
+            [0,3,6], [1,4,7], [2,5,8],
+            [0,4,8], [2,4,6]
+        ];
+
+        // Configuración de niveles
+        const levels = [
+            { name: "Principiante", difficulty: 1, description: "¡Empieza tu aventura!" },
+            { name: "Aprendiz", difficulty: 2, description: "Va tomando forma..." },
+            { name: "Novato", difficulty: 3, description: "¡Sigue así!" },
+            { name: "Competidor", difficulty: 4, description: "Las cosas se ponen interesantes" },
+            { name: "Experto", difficulty: 5, description: "¡Estás en racha!" },
+            { name: "Maestro", difficulty: 6, description: "Nivel avanzado" },
+            { name: "Gran Maestro", difficulty: 7, description: "Casi perfecto" },
+            { name: "Leyenda", difficulty: 8, description: "¡Increíble!" },
+            { name: "Mítico", difficulty: 9, description: "Últimos retos" },
+            { name: "Supremo", difficulty: 10, description: "¡Nivel final!" }
+        ];
+
+        // =========================
+        // SISTEMA DE SONIDO SIMPLIFICADO
+        // =========================
+        function playSound(type) {
+            try {
+                if (type === 'click') {
+                    // Sonido de click simple
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.value = 800;
+                    oscillator.type = 'sine';
+                    
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.1);
+                }
+                else if (type === 'win') {
+                    // Sonido de victoria
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.value = 523.25;
+                    oscillator.type = 'sine';
+                    
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.5);
+                }
+            } catch (e) {
+                // Silenciar errores de audio
+            }
+        }
+
+        // =========================
+        // SISTEMA DE NIVELES
+        // =========================
+        function initializeLevels() {
+            levelsGrid.innerHTML = '';
+            const maxUnlocked = completedLevels.length > 0 ? Math.max(...completedLevels) + 1 : 1;
+            
+            levels.forEach((level, index) => {
+                const levelNumber = index + 1;
+                const levelBtn = document.createElement('button');
+                levelBtn.className = 'level-btn';
+                levelBtn.textContent = `Nivel ${levelNumber}: ${level.name}`;
+                
+                if (completedLevels.includes(levelNumber)) {
+                    levelBtn.classList.add('completed');
+                    levelBtn.innerHTML += ' ✅';
+                } else if (levelNumber > maxUnlocked) {
+                    levelBtn.classList.add('locked');
+                    levelBtn.innerHTML += ' 🔒';
+                }
+                
+                levelBtn.addEventListener('click', () => {
+                    if (!levelBtn.classList.contains('locked')) {
+                        startAdventureLevel(levelNumber);
+                    }
+                });
+                
+                levelsGrid.appendChild(levelBtn);
+            });
+            
+            updateLevelProgress();
+        }
+
+        function updateLevelProgress() {
+            const completed = completedLevels.length;
+            levelProgress.textContent = `Progreso: ${completed}/10 niveles`;
+        }
+
+        function startAdventureLevel(level) {
+            currentLevel = level;
+            adventureMode = true;
+            vsComputer = true;
+            humanPlayer = 'X';
+            botPlayer = 'O';
+            
+            levelsScreen.style.display = 'none';
+            game.style.display = 'flex';
+            
+            levelInfo.textContent = `Nivel ${level} - ${levels[level-1].name}`;
+            levelInfo.style.display = 'block';
+            btnNextLevel.style.display = 'none';
+            
+            resetGame();
+        }
+
+        function completeLevel() {
+            if (adventureMode && !completedLevels.includes(currentLevel)) {
+                completedLevels.push(currentLevel);
+                localStorage.setItem('completedLevels', JSON.stringify(completedLevels));
+                updateLevelProgress();
+                
+                if (currentLevel < 10) {
+                    btnNextLevel.style.display = 'block';
+                } else {
+                    statusEl.textContent = "🎉 ¡Felicidades! Completaste todos los niveles 🏆";
+                }
+            }
+        }
+
+        // =========================
+        // SISTEMA DE CONFETI
+        // =========================
+        function resizeConfetti() {
+            confettiCanvas.width = window.innerWidth;
+            confettiCanvas.height = window.innerHeight;
+        }
+
+        function spawnConfetti() {
+            const colors = ['#ff4a6e', '#00cfff', '#ffdd57', '#ff758c', '#7efff5'];
+            const confettiPieces = [];
+            
+            for (let i = 0; i < 100; i++) {
+                confettiPieces.push({
+                    x: Math.random() * confettiCanvas.width,
+                    y: -20,
+                    size: Math.random() * 8 + 4,
+                    speed: Math.random() * 3 + 2,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    rotation: Math.random() * 360
+                });
+            }
+            
+            let animationId;
+            const animateConfetti = () => {
+                confCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+                
+                let activePieces = 0;
+                
+                confettiPieces.forEach(piece => {
+                    piece.y += piece.speed;
+                    piece.rotation += 2;
+                    
+                    confCtx.save();
+                    confCtx.translate(piece.x, piece.y);
+                    confCtx.rotate(piece.rotation * Math.PI / 180);
+                    
+                    confCtx.fillStyle = piece.color;
+                    confCtx.fillRect(-piece.size/2, -piece.size/2, piece.size, piece.size);
+                    
+                    confCtx.restore();
+                    
+                    if (piece.y < confettiCanvas.height) {
+                        activePieces++;
+                    }
+                });
+                
+                if (activePieces > 0) {
+                    animationId = requestAnimationFrame(animateConfetti);
+                } else {
+                    cancelAnimationFrame(animationId);
+                }
+            };
+            
+            animateConfetti();
+        }
+
+        // =========================
+        // FUNCIONES PRINCIPALES DEL JUEGO - CORREGIDAS
+        // =========================
+        function startGame(ai) {
+            vsComputer = ai;
+            adventureMode = false;
+            menu.style.display = 'none';
+            levelInfo.style.display = 'none';
+            
+            if (ai) {
+                chooseXO.style.display = 'flex';
+            } else {
+                chooseXO.style.display = 'flex';
+                statusEl.textContent = "Jugador 1 elige su ficha";
+            }
+        }
+
+        function resetGame() {
+            // Cancelar cualquier movimiento pendiente del bot
+            if (botTimeout) {
+                clearTimeout(botTimeout);
+                botTimeout = null;
+            }
+            
+            gameState = Array(9).fill('');
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('X', 'O');
+                cell.style.background = '';
+                cell.style.transform = '';
+            });
+            
+            currentPlayer = 'X';
+            statusEl.textContent = `Turno de ${currentPlayer}`;
+            statusEl.className = 'status';
+            gameActive = true;
+            
+            confCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+        }
+
+        function makeMove(index, player) {
+            if (!gameActive || gameState[index] !== "") return;
+            
+            gameState[index] = player;
+            const cell = cells[index];
+            cell.textContent = player;
+            cell.classList.add(player);
+            
+            // Animación y sonido
+            cell.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                cell.style.transform = 'scale(1)';
+            }, 200);
+            
+            playSound('click');
+            
+            checkResult();
+            if (!gameActive) return;
+
+            // Cambiar turno SOLO después de verificar el resultado
+            if (vsComputer && gameActive) {
+                currentPlayer = currentPlayer === humanPlayer ? botPlayer : humanPlayer;
+                statusEl.textContent = `Turno de ${currentPlayer}`;
+                
+                // Si es turno del bot, hacer movimiento después de delay
+                if (currentPlayer === botPlayer && gameActive) {
+                    botTimeout = setTimeout(() => {
+                        if (gameActive && currentPlayer === botPlayer) {
+                            const botMove = bestMove();
+                            if (botMove !== -1) {
+                                makeMove(botMove, botPlayer);
+                            }
+                        }
+                    }, getAIDelay());
+                }
+            } else if (!vsComputer && gameActive) {
+                // MODO 2 JUGADORES - Cambio simple de turno
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                statusEl.textContent = `Turno de ${currentPlayer}`;
+            }
+        }
+
+        function getAIDelay() {
+            const baseDelay = 800;
+            const levelFactor = Math.max(1, 11 - currentLevel);
+            return (baseDelay * levelFactor) / 10;
+        }
+
+        function bestMove() {
+            const difficulty = levels[currentLevel - 1].difficulty;
+            
+            // La IA comete errores según la dificultad
+            const shouldMakeMistake = Math.random() < (1 - difficulty * 0.08);
+            
+            if (shouldMakeMistake && difficulty < 8) {
+                const empty = gameState
+                    .map((cell, index) => cell === "" ? index : -1)
+                    .filter(index => index !== -1);
+                if (empty.length > 0) {
+                    return empty[Math.floor(Math.random() * empty.length)];
+                }
+            }
+            
+            // 1) Intentar ganar
+            for (let i = 0; i < 9; i++) {
+                if (gameState[i] === "") {
+                    gameState[i] = botPlayer;
+                    if (checkWin(botPlayer)) {
+                        gameState[i] = '';
+                        return i;
+                    }
+                    gameState[i] = '';
+                }
+            }
+            
+            // 2) Bloquear jugador
+            for (let i = 0; i < 9; i++) {
+                if (gameState[i] === "") {
+                    gameState[i] = humanPlayer;
+                    if (checkWin(humanPlayer)) {
+                        gameState[i] = '';
+                        return i;
+                    }
+                    gameState[i] = '';
+                }
+            }
+            
+            // 3) Centro
+            if (gameState[4] === "") return 4;
+            
+            // 4) Esquinas
+            const corners = [0, 2, 6, 8].filter(i => gameState[i] === "");
+            if (corners.length > 0) {
+                return corners[Math.floor(Math.random() * corners.length)];
+            }
+            
+            // 5) Cualquier espacio vacío
+            const empty = gameState
+                .map((cell, index) => cell === "" ? index : -1)
+                .filter(index => index !== -1);
+            
+            return empty.length > 0 ? empty[Math.floor(Math.random() * empty.length)] : -1;
+        }
+
+        function checkWin(player) {
+            return winningConditions.some(condition => 
+                condition.every(index => gameState[index] === player)
+            );
+        }
+
+        function checkResult() {
+            let roundWon = false;
+            
+            for (let condition of winningConditions) {
+                const [a, b, c] = condition;
+                if (gameState[a] && gameState[a] === gameState[b] && gameState[a] === gameState[c]) {
+                    roundWon = true;
+                    break;
+                }
+            }
+            
+            if (roundWon) {
+                gameActive = false;
+                
+                // Cancelar movimiento pendiente del bot
+                if (botTimeout) {
+                    clearTimeout(botTimeout);
+                    botTimeout = null;
+                }
+                
+                if (vsComputer) {
+                    if (currentPlayer === humanPlayer) {
+                        statusEl.textContent = "¡Ganaste! 🎉";
+                        statusEl.className = "status win";
+                        playSound('win');
+                        if (adventureMode) {
+                            completeLevel();
+                            spawnConfetti();
+                        }
+                    } else {
+                        statusEl.textContent = "¡La computadora gana! 🤖";
+                        statusEl.className = "status lose";
+                    }
+                } else {
+                    statusEl.textContent = `¡${currentPlayer} gana! 🎉`;
+                    statusEl.className = "status win";
+                    playSound('win');
+                }
+                return;
+            }
+            
+            if (!gameState.includes("")) {
+                gameActive = false;
+                
+                if (botTimeout) {
+                    clearTimeout(botTimeout);
+                    botTimeout = null;
+                }
+                statusEl.textContent = "¡Empate! 🤝";
+            }
+        }
+
+        // =========================
+        // EVENT LISTENERS CORREGIDOS
+        // =========================
+        btnOne.addEventListener('click', () => startGame(true));
+        btnTwo.addEventListener('click', () => startGame(false));
+        btnAdventure.addEventListener('click', () => {
+            menu.style.display = 'none';
+            levelsScreen.style.display = 'flex';
+            initializeLevels();
+        });
+        
+        btnBack.addEventListener('click', () => {
+            game.style.display = 'none';
+            menu.style.display = 'flex';
+            if (botTimeout) {
+                clearTimeout(botTimeout);
+                botTimeout = null;
+            }
+        });
+        
+        btnRestart.addEventListener('click', resetGame);
+        
+        btnBackXO.addEventListener('click', () => {
+            chooseXO.style.display = 'none';
+            menu.style.display = 'flex';
+        });
+        
+        btnBackLevels.addEventListener('click', () => {
+            levelsScreen.style.display = 'none';
+            menu.style.display = 'flex';
+        });
+        
+        btnNextLevel.addEventListener('click', () => {
+            startAdventureLevel(currentLevel + 1);
+        });
+        
+        chooseX.addEventListener('click', () => {
+            humanPlayer = 'X';
+            botPlayer = 'O';
+            chooseXO.style.display = 'none';
+            game.style.display = 'flex';
+            resetGame();
+        });
+        
+        chooseO.addEventListener('click', () => {
+            humanPlayer = 'O';
+            botPlayer = 'X';
+            chooseXO.style.display = 'none';
+            game.style.display = 'flex';
+            resetGame();
+            
+            // Si el jugador elige O, el bot empieza primero
+            if (vsComputer) {
+                currentPlayer = botPlayer;
+                statusEl.textContent = `Turno de ${currentPlayer}`;
+                
+                botTimeout = setTimeout(() => {
+                    if (gameActive) {
+                        makeMove(bestMove(), botPlayer);
+                    }
+                }, 800);
+            }
+        });
+        
+        // EVENT LISTENER CORREGIDO PARA 2 JUGADORES
+        cells.forEach((cell, index) => {
+            cell.addEventListener('click', () => {
+                if (gameActive) {
+                    if (vsComputer) {
+                        // Modo 1 jugador - solo el jugador humano puede hacer movimientos
+                        if (currentPlayer === humanPlayer) {
+                            makeMove(index, humanPlayer);
+                        }
+                    } else {
+                        // Modo 2 jugadores - ambos jugadores pueden hacer movimientos en su turno
+                        makeMove(index, currentPlayer);
+                    }
+                }
+            });
+        });
+
+        // =========================
+        // INICIALIZACIÓN
+        // =========================
+        window.addEventListener('load', resizeConfetti);
+        window.addEventListener('resize', resizeConfetti);
+
+        // Inicializar anuncios
+        (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+</body>
+</html>
